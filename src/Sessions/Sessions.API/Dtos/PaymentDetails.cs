@@ -1,0 +1,1 @@
+public record PaymentDetails(string SessionId, string TransactionNumber, decimal amountCharged);

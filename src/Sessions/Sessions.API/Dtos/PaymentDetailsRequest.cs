@@ -1,0 +1,1 @@
+public record PaymentDetailsRequest(string SessionId, PaymentDetails PaymentDetails);

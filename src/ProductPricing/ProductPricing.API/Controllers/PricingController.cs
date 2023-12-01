@@ -1,0 +1,39 @@
+using Microsoft.AspNetCore.Mvc;
+using ProductPricing.API.Dtos;
+using ProductPricing.API.Entities;
+using ProductPricing.API.Services;
+
+namespace ProductPricing.API.Controllers;
+
+[Route("api")]
+public class PricingController : ControllerBase
+{
+    private readonly ILogger<PricingController> _logger;
+    private readonly ITariffService _tariffService;
+
+    public PricingController(ILogger<PricingController> logger, ITariffService tariffService)
+    {
+        _logger = logger;
+        _tariffService = tariffService;
+    }
+
+    [HttpPost("prices/calculate")]
+    public async Task<IActionResult> CalculatePrices([FromBody] SessionPricingRequest session)
+    {
+        _logger.LogInformation("request received: {Session}", session.ToString());
+        try
+        {
+            var price = await _tariffService.CalculatePrice(session);
+            return Ok(price);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+            //TODO: How do you simulate failure
+            // you can have some modes in each service which you can set to simulate failure
+            return StatusCode(StatusCodes.Status500InternalServerError, 
+                new { message = "An error occurred while processing your request. Please try again later." });
+        }
+                 
+    }
+}
