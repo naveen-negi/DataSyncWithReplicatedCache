@@ -4,4 +4,4 @@ namespace SessionOrchestrator.Controllers;
 
 public record SessionTransactionResult(bool IsSuccess, PaymentResult? PaymentDetails);
 
-public record SessionEndRequest();
+public record SessionEndRequest(string SessionId);

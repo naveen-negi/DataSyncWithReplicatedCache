@@ -1,31 +1,19 @@
-using SessionOrchestrator.Controllers;
+using Microsoft.AspNetCore.Mvc;
+using Refit;
+using SessionOrchestrator.Controllers.Dto;
 using SessionOrchestrator.Transactions;
 using static SessionOrchestrator.Transactions.Transaction;
 
-namespace SessionOrchestrator.Services;
+namespace SessionOrchestrator.Clients;
 
-public interface ISessionServiceAPI
-{
-    public void StartSession();
-    public SessionResult StopSession();
-}
+
+public record SessionResult(string Status, Guid SessionId, string UserId, string LocationId, DateTime StartDate, DateTime? EndDate);
 
 [Saga(new[] { SESSION_STARTED, SESSION_STOPPED })]
-public class SessionServiceAPI 
+public interface ISessionServiceApi
 {
-   public void StartSession()
-   {
-   }
-
-   public SessionResult StopSession(SessionEndRequest sessionEndRequest)
-   {
-       return new SessionResult();
-   }
-   
-   public SessionResult RollBackStopSessionUpdate(SessionEndRequest sessionEndRequest)
-   {
-       return new SessionResult();
-   }
+    [Post("/api/sessions")]
+    public Task StartSession([Body] SessionStartRequest request);
+    [Post("/api/sessions/{sessionId}/end")]
+    public Task<SessionResult> StopSession(string sessionId);
 }
-
-public record SessionResult {};

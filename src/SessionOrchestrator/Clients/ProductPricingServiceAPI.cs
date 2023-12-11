@@ -1,3 +1,5 @@
+using SessionOrchestrator.Clients;
+
 namespace SessionOrchestrator.Services;
 
 public class ProductPricingServiceAPI

@@ -44,6 +44,7 @@ namespace Sessions.API.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError(e, "Error while stopping session: " + e.Message);
                 return StatusCode(500, e.Message);
             } 
         }

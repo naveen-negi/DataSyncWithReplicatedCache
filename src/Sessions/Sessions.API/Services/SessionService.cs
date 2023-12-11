@@ -21,20 +21,7 @@ class SessionService : ISessionService
         var session = _sessionsRepository.Get(Guid.Parse(request.SessionId));
         var stoppedSession = _sessionsRepository.Save(session.Stop());
         _logger.LogInformation(stoppedSession.ToString());
-        var sessionPricingRequest = new SessionPricingRequest(session.Id.ToString(), stoppedSession.StartDate, stoppedSession.EndDate, stoppedSession.LocationId, stoppedSession.UserId);
-        try
-        {
-            var prices = await _productPriceServiceApi.CalculatePrice(sessionPricingRequest);
-            session.UpdatePricingDetails(prices);
-            _sessionsRepository.Save(session);
             
-            return new SessionResult(session.Status, session.Id, session.UserId, session.LocationId, session.StartDate, session.EndDate);
-        }
-        catch (Exception)
-        {
-            _sessionsRepository.Save(session.Rollback());
-            throw new Exception("Failed to calculate price");
-        }
         return new SessionResult(stoppedSession.Status, stoppedSession.Id, stoppedSession.UserId, stoppedSession.LocationId, stoppedSession.StartDate, stoppedSession.EndDate);
     }
 

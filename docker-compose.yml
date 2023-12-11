@@ -37,13 +37,25 @@ services:
         ConnectionStrings__PaymentsDB: "Host=payments-db; Database=payments_db; Port=5432; Username=payments_dev; Password=password"
         SessionService__baseUrl: "http://sessions-api:5290"
         ProductPricingService__baseUrl: "http://productpricing-api:5260"
+        
+  
+  orchestrator-api:
+    build:
+      context: .
+      dockerfile: src/SessionOrchestrator/Dockerfile
+    ports:
+      - "9012:5118"
+    volumes:
+      - ./src/SessionOrchestrator:/build/src/SessionOrchestrator
+    environment:
+      SessionService__baseUrl: "http://sessions-api:5290"
       
   sessions-db:
     image: postgres:16.0-alpine
     ports:
       - "5436:5432"
-    volumes:
-      - ./volume/sessions_data:/var/lib/postgresql/data
+#    volumes:
+#      - ./volume/sessions_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=sessions_dev

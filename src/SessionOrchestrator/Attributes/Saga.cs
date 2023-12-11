@@ -7,7 +7,7 @@ namespace SessionOrchestrator.Transactions;
         SESSION_STOPPED,
     }
 
-[AttributeUsage(AttributeTargets.Class) ]
+[AttributeUsage(AttributeTargets.Interface) ]
 public class SagaAttribute : Attribute
 {
     public Transaction[] Transaction { get; }
