@@ -21,7 +21,7 @@ public class SessionPaidHandler : IRequestHandler<SessionPaid>
     public Task Handle(SessionPaid request, CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Updating Payment details in orchestrator for session  {request.SessionId} .... ");
-        // _sessionOrchestratorApi.UpdatePaymentDetails(request.SessionId, new PaymentDetailsRequest(request.SessionId, request.Status));
+        _sessionOrchestratorApi.UpdatePaymentDetails(request.SessionId, new PaymentDetailsRequest(request.SessionId, request.Status));
         _logger.LogInformation($"Payment details updated for session {request.SessionId}");
         return Task.CompletedTask;
     }

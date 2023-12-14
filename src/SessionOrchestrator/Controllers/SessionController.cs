@@ -65,6 +65,23 @@ public class SessionController : ControllerBase
     }
     
     
+    [HttpPost("workflow/{sessionId}/payment")]
+    public async Task<IActionResult> UpdatePaymentDetails([FromBody] PaymentDetailsRequest request)
+    {
+        try
+        {
+            _logger.LogInformation($"Payment details update request received.Session {request.SessionId} updated.");
+            // await _workflow.HandlePriceUpdate(request);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while updating Pricing data: " + e.Message);
+            return StatusCode(500);
+        }
+    }
+    
+    
     [HttpPost("sessions/start")]
     public async Task<IActionResult> End(SessionStartRequest request)
     {
@@ -83,3 +100,4 @@ public class SessionController : ControllerBase
 }
 
 public record PricingUpdateRequest(string SessionId, decimal Price, decimal PriceAfterTax, int TaxBasisPoints, decimal TaxAmount); 
+public record PaymentDetailsRequest(string SessionId, string Status);
