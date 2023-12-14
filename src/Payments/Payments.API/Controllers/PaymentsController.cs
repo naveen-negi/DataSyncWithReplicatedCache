@@ -21,7 +21,9 @@ public class PaymentsController : ControllerBase
     {
         try
         {
-            return Ok(await _paymentsService.ChargeCustomer(request));
+            _logger.LogInformation($"Payment request received. Payment Processing started for Session {request.SessionId}.");
+            // return Ok(await _paymentsService.ChargeCustomer(request));
+            return Ok();
         }
         catch (Exception e)
         {

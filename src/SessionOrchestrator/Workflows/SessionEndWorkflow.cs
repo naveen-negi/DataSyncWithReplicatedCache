@@ -18,7 +18,7 @@ public interface ISessionWorkflow
     Task StartSession(SessionStartRequest request);
     Task StopSession(string sessionId);
     void HandleSessionUpdate(SessionUpdateRequest request);
-    void HandlePriceUpdate(PricingUpdateRequest request);
+    Task HandlePriceUpdate(PricingUpdateRequest request);
 }
 
 public class SessionWorkflow : ISessionWorkflow
@@ -27,15 +27,18 @@ public class SessionWorkflow : ISessionWorkflow
     private readonly ISessionServiceApi _sessionServiceApi;
     private StateMachine<WorkflowState, Trigger> _machine;
     private readonly IProductPricingServiceApi _productPricingServiceApi;
+    private readonly IPaymentsServiceApi _paymentsServiceApi;
 
 
     public SessionWorkflow(IOptions<SessionServiceConfig> sessionConfig,
         IOptions<ProductPricingServiceConfig> pricingConfig,
+        IOptions<PaymentsServiceConfig> paymentsConfig,
         ILogger<SessionWorkflow> logger)
     {
         _logger = logger;
         _sessionServiceApi = RestService.For<ISessionServiceApi>(sessionConfig.Value.BaseUrl);
         _productPricingServiceApi = RestService.For<IProductPricingServiceApi>(pricingConfig.Value.BaseUrl);
+        _paymentsServiceApi = RestService.For<IPaymentsServiceApi>(paymentsConfig.Value.BaseUrl);
         SetupStateMachine();
     }
 
@@ -85,11 +88,13 @@ public class SessionWorkflow : ISessionWorkflow
         // TODO: Once database is implemented, we need to update the session with the end date and status
     }
 
-    public void HandlePriceUpdate(PricingUpdateRequest request)
+    public async Task HandlePriceUpdate(PricingUpdateRequest request)
     {
-        _machine.Fire(Trigger.StartSession);
-        _machine.Fire(Trigger.FinishedSession);
-        _machine.Fire(Trigger.PriceSession);
+        await _machine.FireAsync(Trigger.StartSession);
+        await _machine.FireAsync(Trigger.FinishedSession);
+        await _machine.FireAsync(Trigger.PriceSession);
+        // FIXME: UserId either needs to flow in whole transaction or should be stored in database (harding coding for now)
+        await _paymentsServiceApi.ProcessPayment(new BilledSessionRequest(request.SessionId, "1", request.PriceAfterTax, request.TaxAmount, request.TaxBasisPoints));
     }
 
     public void HandleSessionBillingUpdate(SessionBillingUpdateRequest request)

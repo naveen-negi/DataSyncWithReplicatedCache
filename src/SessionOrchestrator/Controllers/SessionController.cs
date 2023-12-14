@@ -54,7 +54,7 @@ public class SessionController : ControllerBase
         try
         {
             _logger.LogInformation($"Price update request received.Session {request.SessionId} updated.");
-            _workflow.HandlePriceUpdate(request);
+            await _workflow.HandlePriceUpdate(request);
             return Ok();
         }
         catch (Exception e)

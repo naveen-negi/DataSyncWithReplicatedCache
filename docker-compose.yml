@@ -53,6 +53,7 @@ services:
     environment:
       SessionService__baseUrl: "http://sessions-api:5290"
       ProductPricingService__baseUrl: "http://productpricing-api:5260"
+      PaymentsService__baseUrl: "http://payments-api:5057"
       
   sessions-db:
     image: postgres:16.0-alpine

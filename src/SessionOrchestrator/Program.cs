@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 builder.Services.Configure<SessionServiceConfig>(configuration.GetSection("SessionService"));
 builder.Services.Configure<ProductPricingServiceConfig>(configuration.GetSection("ProductPricingService"));
+builder.Services.Configure<PaymentsServiceConfig>(configuration.GetSection("PaymentsService"));
 builder.Services.AddScoped<ISessionWorkflow, SessionWorkflow>();
 
 builder.Services.AddHttpLogging(o => { });
