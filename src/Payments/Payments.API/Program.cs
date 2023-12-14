@@ -24,8 +24,12 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddScoped<IUserPaymentDetailsRepository, UserPaymentDetailsRepository>();
     var configuration = builder.Configuration;
     
-    builder.Services.Configure<SessionServiceConfig>(configuration.GetSection("SessionService"));
-    builder.Services.Configure<ProductPricingServiceConfig>(configuration.GetSection("ProductPricingService"));
+    builder.Services.Configure<SessionOrchestratorConfig>(configuration.GetSection("SessionOrchestratorService"));
+    
+    builder.Services.AddMediatR(cfg =>
+    {
+        cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly);
+    });
     
 builder.Services.AddOpenTelemetry()
     .WithTracing(b => b
