@@ -17,6 +17,12 @@ var builder = WebApplication.CreateBuilder(args);
     var configuration = builder.Configuration;
     
     builder.Services.Configure<PaymentsServiceConfig>(configuration.GetSection("PaymentsService"));
+    builder.Services.Configure<SessionOrchestratorServiceConfig>(configuration.GetSection("SessionOrchestratorService"));
+    
+    builder.Services.AddMediatR(cfg =>
+    {
+        cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly);
+    });
     
     builder.Services.AddOpenTelemetry()
         .WithTracing(b => b

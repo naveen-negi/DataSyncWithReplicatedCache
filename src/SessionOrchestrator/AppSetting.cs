@@ -9,3 +9,8 @@ public class SessionServiceConfig
 {
     public string BaseUrl { get; set; }
 }
+
+public class ProductPricingServiceConfig
+{
+    public string BaseUrl { get; set; }
+}

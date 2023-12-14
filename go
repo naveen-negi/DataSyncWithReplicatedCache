@@ -37,11 +37,15 @@ stop_session() {
     fi
     
     echo "Stopping session with ID ${sessionId}..."
-    local response=$(curl --silent --location "http://localhost:9012/api/sessions/${sessionId}/processPayment" \
+    local response=$(curl --location --request POST "http://localhost:9012/api/sessions/${sessionId}/processPayment" \
     --header 'Content-Type: application/json')
     echo "Response from server:"
     echo "$response"
-    echo "Session stopped."
+}
+
+jaeger() {
+    local url="http://localhost:16686/search"
+    open "$url"
 }
 
 case "$COMMAND" in
@@ -54,11 +58,15 @@ case "$COMMAND" in
     stop-session)
         stop_session $2
         ;;
+    open-jaeger)
+        jaeger
+        ;;
     *)
         echo "Usage: ./go [command]"
         echo "Commands:"
         echo "  start-valid-session    Start a session that can be Priced and Payed"
         echo "  stop-session    Stop a session"
         echo "  start-invalid-session    Start a session that can NOT be Priced and Payed"
+        echo "  jaeger    Open jaeger in browser"
         ;;
 esac

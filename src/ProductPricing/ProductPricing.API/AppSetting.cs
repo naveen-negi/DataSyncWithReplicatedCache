@@ -1,11 +1,11 @@
 namespace ProductPricing.API;
 
-public class AppSetting
+public class PaymentsServiceConfig
 {
-    
+    public string BaseUrl { get; set; }
 }
 
-public class PaymentsServiceConfig
+public class SessionOrchestratorServiceConfig
 {
     public string BaseUrl { get; set; }
 }

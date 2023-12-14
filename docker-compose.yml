@@ -12,6 +12,7 @@ services:
     environment:
       ConnectionStrings__SessionsDB: "Host=sessions-db; Database=sessions_db; Port=5432; Username=sessions_dev; Password=password"
       ProductPricingService__baseUrl: "http://productpricing-api:5260"
+      SessionOrchestrator__baseUrl: "http://orchestrator-api:5118"
       
   productpricing-api:
     build:
@@ -24,6 +25,7 @@ services:
     environment:
       ConnectionStrings__TariffDB: "Host=productpricing-db; Database=tariff_db; Port=5432; Username=tariff_dev; Password=password"
       PaymentsService__baseUrl: "http://payments-api:5057"
+      SessionOrchestratorService__baseUrl: "http://orchestrator-api:5118"
 
   payments-api:
     build:
@@ -37,6 +39,7 @@ services:
         ConnectionStrings__PaymentsDB: "Host=payments-db; Database=payments_db; Port=5432; Username=payments_dev; Password=password"
         SessionService__baseUrl: "http://sessions-api:5290"
         ProductPricingService__baseUrl: "http://productpricing-api:5260"
+        SessionOrchestratorService__baseUrl: "http://orchestrator-api:5118"
         
   
   orchestrator-api:
@@ -49,6 +52,7 @@ services:
       - ./src/SessionOrchestrator:/build/src/SessionOrchestrator
     environment:
       SessionService__baseUrl: "http://sessions-api:5290"
+      ProductPricingService__baseUrl: "http://productpricing-api:5260"
       
   sessions-db:
     image: postgres:16.0-alpine

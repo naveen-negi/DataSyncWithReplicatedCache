@@ -23,16 +23,15 @@ public class PricingController : ControllerBase
         _logger.LogInformation("request received: {Session}", session.ToString());
         try
         {
-            var price = await _tariffService.CalculatePrice(session);
-            return Ok(price);
+            await _tariffService.CalculatePrice(session);
+            return Accepted();
         }
         catch (Exception e)
         {
             _logger.LogError(e.Message);
-            //TODO: How do you simulate failure
             // you can have some modes in each service which you can set to simulate failure
             return StatusCode(StatusCodes.Status500InternalServerError, 
-                new { message = "An error occurred while processing your request. Please try again later." });
+                new { message = "An error occurred while calculating price for session" });
         }
                  
     }

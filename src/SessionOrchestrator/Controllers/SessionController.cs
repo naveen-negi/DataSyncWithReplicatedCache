@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using SessionOrchestrator.Controllers.Dto;
-using SessionOrchestrator.Services;
 using SessionOrchestrator.Workflows;
 
 namespace SessionOrchestrator.Controllers;
@@ -23,11 +22,44 @@ public class SessionController : ControllerBase
         try
         {
             await _workflow.StopSession(sessionId);
-            return Ok();
+            return Ok(sessionId);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error while processing payment for session: " + e.Message);
+            return StatusCode(500, e.Message);
+        }
+    }
+    
+    [HttpPost("sessions/{sessionId}/update")]
+    public async Task<IActionResult> UpdateSession([FromBody] SessionUpdateRequest request)
+    {
+        try
+        {
+            _logger.LogInformation($"Session update request received.Session {request.SessionId} updated.");
+            _workflow.HandleSessionUpdate(request);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while updating session data: " + e.Message);
+            return StatusCode(500);
+        }
+    }
+    
+    
+    [HttpPost("workflow/{sessionId}/price")]
+    public async Task<IActionResult> UpdatePrice([FromBody] PricingUpdateRequest request)
+    {
+        try
+        {
+            _logger.LogInformation($"Price update request received.Session {request.SessionId} updated.");
+            _workflow.HandlePriceUpdate(request);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while updating Pricing data: " + e.Message);
             return StatusCode(500);
         }
     }
@@ -49,3 +81,5 @@ public class SessionController : ControllerBase
     }
 
 }
+
+public record PricingUpdateRequest(string SessionId, decimal Price, decimal PriceAfterTax, int TaxBasisPoints, decimal TaxAmount); 

@@ -1,10 +1,13 @@
+using System.Reflection;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sessions.API;
 using Sessions.API.Controllers;
 using Sessions.API.Entities;
+using Sessions.API.Repositories;
 using Sessions.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,9 +21,19 @@ var builder = WebApplication.CreateBuilder(args);
     var configuration = builder.Configuration;
     
     builder.Services.Configure<ProductPricingServiceConfig>(configuration.GetSection("ProductPricingService"));
+    builder.Services.Configure<SessionOrchestratorConfig>(configuration.GetSection("SessionOrchestrator"));
+    builder.Services.AddMediatR(cfg =>
+    {
+        cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly);
+    });
 }
 
-builder.Services.AddHttpLogging(o => { });
+builder.Services.AddHttpLogging(o =>
+{
+    o.LoggingFields = HttpLoggingFields.All;
+    o.RequestBodyLogLimit = 4096;
+    o.ResponseBodyLogLimit = 4096;
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
