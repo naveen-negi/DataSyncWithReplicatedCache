@@ -19,6 +19,7 @@ public interface ISessionWorkflow
     Task StopSession(string sessionId);
     void HandleSessionUpdate(SessionUpdateRequest request);
     Task HandlePriceUpdate(PricingUpdateRequest request);
+    Task HandlePaymentUpdate(PaymentDetailsRequest request);
 }
 
 public class SessionWorkflow : ISessionWorkflow
@@ -95,6 +96,14 @@ public class SessionWorkflow : ISessionWorkflow
         await _machine.FireAsync(Trigger.PriceSession);
         // FIXME: UserId either needs to flow in whole transaction or should be stored in database (harding coding for now)
         await _paymentsServiceApi.ProcessPayment(new BilledSessionRequest(request.SessionId, "1", request.PriceAfterTax, request.TaxAmount, request.TaxBasisPoints));
+    }
+
+    public async Task HandlePaymentUpdate(PaymentDetailsRequest request)
+    {
+        await _machine.FireAsync(Trigger.StartSession);
+        await _machine.FireAsync(Trigger.FinishedSession);
+        await _machine.FireAsync(Trigger.PriceSession);
+        await _machine.FireAsync(Trigger.PaySession);
     }
 
     public void HandleSessionBillingUpdate(SessionBillingUpdateRequest request)

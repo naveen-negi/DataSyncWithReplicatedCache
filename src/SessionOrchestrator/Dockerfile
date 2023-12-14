@@ -21,6 +21,7 @@ WORKDIR "/build/src/SessionOrchestrator"
 # Set the environment to Development
 ENV ASPNETCORE_ENVIRONMENT=Development
 ENV DOTNET_WATCH_SUPPRESS_PROMPTS=1
+ENV DOTNET_WATCH_SUPPRESS_BROWSERS=1
 
 # Start the application using dotnet watch for hot reloading
 ENTRYPOINT ["dotnet", "watch", "run", "--project", "SessionOrchestrator.csproj"]

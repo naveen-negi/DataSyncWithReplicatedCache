@@ -71,12 +71,12 @@ public class SessionController : ControllerBase
         try
         {
             _logger.LogInformation($"Payment details update request received.Session {request.SessionId} updated.");
-            // await _workflow.HandlePriceUpdate(request);
+            await _workflow.HandlePaymentUpdate(request);
             return Ok();
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while updating Pricing data: " + e.Message);
+            _logger.LogError(e, "Error while updating Payment details: " + e.Message);
             return StatusCode(500);
         }
     }
