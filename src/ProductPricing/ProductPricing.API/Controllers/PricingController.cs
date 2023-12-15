@@ -30,9 +30,8 @@ public class PricingController : ControllerBase
         {
             _logger.LogError(e.Message);
             // you can have some modes in each service which you can set to simulate failure
-            return StatusCode(StatusCodes.Status500InternalServerError, 
+            return StatusCode(StatusCodes.Status500InternalServerError,
                 new { message = "An error occurred while calculating price for session" });
         }
-                 
     }
 }

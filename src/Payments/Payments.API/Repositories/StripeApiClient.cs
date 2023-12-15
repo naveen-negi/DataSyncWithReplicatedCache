@@ -12,12 +12,12 @@ public class MockStripeApiClient : IStripeApiClient
 {
     public Task<StripeChargeResponse> CreateChargeAsync(StripeChargeRequest request)
     {
-        return Task.FromResult(request.CustomerId == "cus_999" ?
-            new StripeChargeResponse(Guid.NewGuid().ToString(), "failed") 
+        return Task.FromResult(request.CustomerId == "cus_999"
+            ? new StripeChargeResponse(Guid.NewGuid().ToString(), "failed")
             : new StripeChargeResponse(Guid.NewGuid().ToString(), "succeeded"));
     }
 }
 
 public record StripeChargeRequest(string CustomerId, decimal Amount, string Currency = "EUR");
 
-public record StripeChargeResponse(string TransactionId, string Status); 
+public record StripeChargeResponse(string TransactionId, string Status);

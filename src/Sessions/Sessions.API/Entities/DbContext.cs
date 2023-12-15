@@ -6,18 +6,17 @@ namespace Sessions.API.Entities;
 public class SessionDBContext : DbContext
 {
     protected readonly IConfiguration Configuration;
-    
+
     public SessionDBContext(IConfiguration configuration)
     {
         Configuration = configuration;
     }
-    
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseNpgsql(Configuration.GetConnectionString("SessionsDB"));
     }
-        
-        
+
+
     public DbSet<SessionEntity> Sessions { get; set; } = null!;
-    
 }

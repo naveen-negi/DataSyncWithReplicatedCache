@@ -11,8 +11,9 @@ public class SessionPriced : IRequest<Payment>
     public decimal TaxAmount { get; }
     public int TaxBasisPoints { get; }
     public string Currency { get; }
-    
-    public SessionPriced( string sessionId, string userId, decimal priceAfterTax, decimal taxAmount, int taxBasisPoints, string currency = "EUR")
+
+    public SessionPriced(string sessionId, string userId, decimal priceAfterTax, decimal taxAmount, int taxBasisPoints,
+        string currency = "EUR")
     {
         SessionId = sessionId;
         UserId = userId;

@@ -26,16 +26,17 @@ public class SessionPricedHandler : IRequestHandler<SessionPriced, Payment>
         _userRepository = userRepository;
         _paymentRepository = paymentRepository;
     }
+
     public async Task<Payment> Handle(SessionPriced request, CancellationToken cancellationToken)
     {
         return await ChargeCustomer(request, cancellationToken);
     }
-    
-    
+
+
     public async Task<Payment> ChargeCustomer(SessionPriced billedSession, CancellationToken ct = default)
     {
         var user = _userRepository.GetUser(billedSession.UserId);
-        
+
         if (user is null)
         {
             throw new Exception("User not found");
@@ -58,15 +59,15 @@ public class SessionPricedHandler : IRequestHandler<SessionPriced, Payment>
         {
             Status = PaymentStatus.Paid, TransactionId = paymentResult.TransactionId
         };
-        
+
         _logger.LogInformation($"Payment successful for session {billedSession.SessionId}");
 
         _paymentRepository.Save(paymentDetails);
         await _mediator.Send(new SessionPaid(paymentDetails.SessionId), ct);
         return paymentDetails;
     }
-    
-    
+
+
     private static Payment PaymentDetails(SessionPriced billedSession, UserPaymentDetails userPaymentDetails)
     {
         var paymentDetails = new Payment

@@ -4,18 +4,16 @@ using Refit;
 using SessionOrchestrator.Clients;
 using SessionOrchestrator.Controllers;
 using SessionOrchestrator.Controllers.Dto;
+using SessionOrchestrator.Entities;
+using SessionOrchestrator.Repositories;
 using Stateless;
 
 namespace SessionOrchestrator.Workflows;
 
-enum WorkflowState {
-    INIT, SESSIONS_STARTED, SESSION_PRICED, SESSION_PAID, SESSION_COMPLETED, SESSION_FAILED,
-    SESSION_ENDED
-}
 
 public interface ISessionWorkflow
 {
-    Task StartSession(SessionStartRequest request);
+    Task<sessionStartResponse> StartSession(SessionStartRequest request);
     Task StopSession(string sessionId);
     void HandleSessionUpdate(SessionUpdateRequest request);
     Task HandlePriceUpdate(PricingUpdateRequest request);
@@ -25,6 +23,7 @@ public interface ISessionWorkflow
 public class SessionWorkflow : ISessionWorkflow
 {
     private readonly ILogger<SessionWorkflow> _logger;
+    private readonly ISessionWorkflowRepository _sessionWorkflowRepository;
     private readonly ISessionServiceApi _sessionServiceApi;
     private StateMachine<WorkflowState, Trigger> _machine;
     private readonly IProductPricingServiceApi _productPricingServiceApi;
@@ -34,43 +33,23 @@ public class SessionWorkflow : ISessionWorkflow
     public SessionWorkflow(IOptions<SessionServiceConfig> sessionConfig,
         IOptions<ProductPricingServiceConfig> pricingConfig,
         IOptions<PaymentsServiceConfig> paymentsConfig,
-        ILogger<SessionWorkflow> logger)
+        ILogger<SessionWorkflow> logger,
+        ISessionWorkflowRepository sessionWorkflowRepository)
     {
         _logger = logger;
+        _sessionWorkflowRepository = sessionWorkflowRepository;
         _sessionServiceApi = RestService.For<ISessionServiceApi>(sessionConfig.Value.BaseUrl);
         _productPricingServiceApi = RestService.For<IProductPricingServiceApi>(pricingConfig.Value.BaseUrl);
         _paymentsServiceApi = RestService.For<IPaymentsServiceApi>(paymentsConfig.Value.BaseUrl);
-        SetupStateMachine();
     }
-
-    private void SetupStateMachine()
+    public async Task<sessionStartResponse> StartSession(SessionStartRequest request)
     {
-        _machine = new StateMachine<WorkflowState, Trigger>(WorkflowState.INIT);
-
-        _machine.Configure(WorkflowState.INIT)
-            .Permit(Trigger.StartSession, WorkflowState.SESSIONS_STARTED);
-
-        _machine.Configure(WorkflowState.SESSIONS_STARTED)
-            .Permit(Trigger.FinishedSession, WorkflowState.SESSION_ENDED)
-            .Permit(Trigger.FailSession, WorkflowState.SESSION_FAILED);
-
-        _machine.Configure(WorkflowState.SESSION_ENDED)
-            .Permit(Trigger.PriceSession, WorkflowState.SESSION_PRICED)
-            .Permit(Trigger.FailSession, WorkflowState.SESSION_FAILED);
-
-        _machine.Configure(WorkflowState.SESSION_PRICED)
-            .Permit(Trigger.PaySession, WorkflowState.SESSION_PAID)
-            .Permit(Trigger.FailSession, WorkflowState.SESSION_FAILED);
-
-        _machine.Configure(WorkflowState.SESSION_PAID)
-            .Permit(Trigger.CompleteSession, WorkflowState.SESSION_COMPLETED)
-            .Permit(Trigger.FailSession, WorkflowState.SESSION_FAILED);
-    }
-
-    public async Task StartSession(SessionStartRequest request)
-    {
-        await _sessionServiceApi.StartSession(request);
-        await _machine.FireAsync(Trigger.StartSession);
+        var response = await _sessionServiceApi.StartSession(request);
+        _logger.LogInformation("Received session id {ResponseSessionId} from session service", response.SessionId);
+        var workflow = new SessionWorkflowEntity(response.SessionId, request.UserId);
+        await _sessionWorkflowRepository.SaveSessionWorkflow(workflow);
+        _logger.LogInformation("Workflow state {workflowToDotGraph}", workflow.ToDotGraph());
+        return response;
     }
 
     public async Task StopSession(string sessionId)
@@ -84,8 +63,9 @@ public class SessionWorkflow : ISessionWorkflow
         // TODO: async flow doesn't work without persisting state in the database
         _machine.Fire(Trigger.StartSession);
         _machine.Fire(Trigger.FinishedSession);
-        _productPricingServiceApi.CalculateSessionPrice(new SessionPricingRequest(request.SessionId, request.Start, request.End, request.LocationId, request.UserId));
-        
+        _productPricingServiceApi.CalculateSessionPrice(new SessionPricingRequest(request.SessionId, request.Start,
+            request.End, request.LocationId, request.UserId));
+
         // TODO: Once database is implemented, we need to update the session with the end date and status
     }
 
@@ -95,7 +75,8 @@ public class SessionWorkflow : ISessionWorkflow
         await _machine.FireAsync(Trigger.FinishedSession);
         await _machine.FireAsync(Trigger.PriceSession);
         // FIXME: UserId either needs to flow in whole transaction or should be stored in database (harding coding for now)
-        await _paymentsServiceApi.ProcessPayment(new BilledSessionRequest(request.SessionId, "1", request.PriceAfterTax, request.TaxAmount, request.TaxBasisPoints));
+        await _paymentsServiceApi.ProcessPayment(new BilledSessionRequest(request.SessionId, "1", request.PriceAfterTax,
+            request.TaxAmount, request.TaxBasisPoints));
     }
 
     public async Task HandlePaymentUpdate(PaymentDetailsRequest request)
@@ -117,10 +98,4 @@ public class SessionWorkflow : ISessionWorkflow
     }
 
     public void FailSession() => _machine.Fire(Trigger.FailSession);
-
-    enum Trigger
-    {
-        StartSession, PriceSession, PaySession, CompleteSession, FailSession,
-        FinishedSession
-    }
 }

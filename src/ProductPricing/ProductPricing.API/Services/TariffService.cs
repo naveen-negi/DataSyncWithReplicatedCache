@@ -24,18 +24,19 @@ public class TariffService : ITariffService
         _tariffRepository = tariffRepository;
         _mediator = mediator;
     }
-    
+
     public async Task<SessionPrice> CalculatePrice(SessionPricingRequest session)
     {
         var tariff = _tariffRepository.Get(session.Start, session.End, session.LocationId);
-        if(tariff == null)
+        if (tariff == null)
         {
             throw new Exception(string.Format("No tariff found %s"));
         }
+
         var priceForSession = tariff.CalculatePrice(session);
         await _mediator.Send(new SessionPriced(session.SessionId, priceForSession.Price,
             priceForSession.PriceAfterTax, priceForSession.TaxBasisPoints, priceForSession.TaxAmount));
-        
+
         return priceForSession;
     }
 }

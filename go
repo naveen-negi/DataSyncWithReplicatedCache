@@ -8,10 +8,10 @@ COMMAND=$1
 
 start_valid_session() {
     echo "Starting a new session with a valid UserId..."
-    curl --location 'http://localhost:5056/api/sessions' \
+    curl --location 'http://localhost:9012/api/workflow/startSession' \
     --header 'Content-Type: application/json' \
     --data '{
-        "locationId": "1234",
+        "LocationId": "1234",
         "UserId": "1"
     }'
     echo "Session started."

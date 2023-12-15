@@ -13,27 +13,25 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddDbContext<TariffDBContext>();
     builder.Services.AddScoped<ITariffRepository, TariffRepository>();
     builder.Services.AddScoped<ITariffService, TariffService>();
-    
+
     var configuration = builder.Configuration;
-    
+
     builder.Services.Configure<PaymentsServiceConfig>(configuration.GetSection("PaymentsService"));
-    builder.Services.Configure<SessionOrchestratorServiceConfig>(configuration.GetSection("SessionOrchestratorService"));
-    
-    builder.Services.AddMediatR(cfg =>
-    {
-        cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly);
-    });
-    
+    builder.Services.Configure<SessionOrchestratorServiceConfig>(
+        configuration.GetSection("SessionOrchestratorService"));
+
+    builder.Services.AddMediatR(cfg => { cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly); });
+
     builder.Services.AddOpenTelemetry()
         .WithTracing(b => b
-        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("ProductPricing"))
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation()
-        .AddJaegerExporter(options =>
-        {
-            options.AgentHost = "jaeger"; // Docker service name for Jaeger
-            options.AgentPort = 6831;     // Default Jaeger agent UDP port
-        }));
+            .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("ProductPricing"))
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddJaegerExporter(options =>
+            {
+                options.AgentHost = "jaeger"; // Docker service name for Jaeger
+                options.AgentPort = 6831; // Default Jaeger agent UDP port
+            }));
 }
 
 builder.Services.AddControllers();

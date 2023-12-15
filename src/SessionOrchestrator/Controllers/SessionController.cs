@@ -30,7 +30,23 @@ public class SessionController : ControllerBase
             return StatusCode(500, e.Message);
         }
     }
-    
+
+    [HttpPost("workflow/startSession")]
+    public async Task<IActionResult> Start([FromBody] SessionStartRequest request)
+    {
+        try
+        {
+            _logger.LogInformation($"Session start request received.Session for user: {request.UserId} started.");
+            var response = await _workflow.StartSession(request);
+            return Ok(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while starting session: " + e.Message);
+            return StatusCode(500, e.Message);
+        }
+    }
+
     [HttpPost("sessions/{sessionId}/update")]
     public async Task<IActionResult> UpdateSession([FromBody] SessionUpdateRequest request)
     {
@@ -46,8 +62,8 @@ public class SessionController : ControllerBase
             return StatusCode(500);
         }
     }
-    
-    
+
+
     [HttpPost("workflow/{sessionId}/price")]
     public async Task<IActionResult> UpdatePrice([FromBody] PricingUpdateRequest request)
     {
@@ -63,8 +79,8 @@ public class SessionController : ControllerBase
             return StatusCode(500);
         }
     }
-    
-    
+
+
     [HttpPost("workflow/{sessionId}/payment")]
     public async Task<IActionResult> UpdatePaymentDetails([FromBody] PaymentDetailsRequest request)
     {
@@ -80,8 +96,8 @@ public class SessionController : ControllerBase
             return StatusCode(500);
         }
     }
-    
-    
+
+
     [HttpPost("sessions/start")]
     public async Task<IActionResult> End(SessionStartRequest request)
     {
@@ -96,8 +112,9 @@ public class SessionController : ControllerBase
             return StatusCode(500);
         }
     }
-
 }
 
-public record PricingUpdateRequest(string SessionId, decimal Price, decimal PriceAfterTax, int TaxBasisPoints, decimal TaxAmount); 
+public record PricingUpdateRequest(string SessionId, decimal Price, decimal PriceAfterTax, int TaxBasisPoints,
+    decimal TaxAmount);
+
 public record PaymentDetailsRequest(string SessionId, string Status);

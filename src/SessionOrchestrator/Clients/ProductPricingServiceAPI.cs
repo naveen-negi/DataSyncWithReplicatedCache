@@ -6,7 +6,6 @@ using static SessionOrchestrator.Transactions.Transaction;
 
 namespace SessionOrchestrator.Clients;
 
-
 [Saga(new[] { SESSION_STARTED, SESSION_STOPPED })]
 public interface IProductPricingServiceApi
 {

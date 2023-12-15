@@ -17,7 +17,7 @@ public class PaymentRepository : IPaymentRepository
     {
         _paymentsDbContext = paymentsDbContext;
     }
-        
+
     public void Save(Payment payment)
     {
         _paymentsDbContext.Payments.Add(payment);

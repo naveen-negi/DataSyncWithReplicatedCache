@@ -16,11 +16,11 @@ public class SessionsRepository : ISessionsRepository
     {
         _sessionDbContext = sessionDbContext;
     }
-    
+
     public SessionEntity Save(SessionEntity sessionEntity)
     {
         // Check if the entity already exists in the database
-        var existingEntity = _sessionDbContext.Sessions.Find(sessionEntity.Id); 
+        var existingEntity = _sessionDbContext.Sessions.Find(sessionEntity.Id);
 
         if (existingEntity == null)
         {

@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +6,6 @@ using OpenTelemetry.Trace;
 using Sessions.API;
 using Sessions.API.Controllers;
 using Sessions.API.Entities;
-using Sessions.API.Repositories;
 using Sessions.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,15 +15,12 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddDbContext<SessionDBContext>();
     builder.Services.AddScoped<ISessionsRepository, SessionsRepository>();
     builder.Services.AddScoped<ISessionService, SessionService>();
-    
+
     var configuration = builder.Configuration;
-    
+
     builder.Services.Configure<ProductPricingServiceConfig>(configuration.GetSection("ProductPricingService"));
     builder.Services.Configure<SessionOrchestratorConfig>(configuration.GetSection("SessionOrchestrator"));
-    builder.Services.AddMediatR(cfg =>
-    {
-        cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly);
-    });
+    builder.Services.AddMediatR(cfg => { cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly); });
 }
 
 builder.Services.AddHttpLogging(o =>
@@ -36,22 +31,19 @@ builder.Services.AddHttpLogging(o =>
 });
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
+    .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
 
 builder.Services.AddOpenTelemetry()
     .WithTracing(b => b
-    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Sessions"))
-    .AddAspNetCoreInstrumentation()
-    .AddHttpClientInstrumentation()
-    .AddJaegerExporter(options =>
-    {
-        options.AgentHost = "jaeger"; // Docker service name for Jaeger
-        options.AgentPort = 6831;     // Default Jaeger agent UDP port
-    }));
+        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("Sessions"))
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddJaegerExporter(options =>
+        {
+            options.AgentHost = "jaeger"; // Docker service name for Jaeger
+            options.AgentPort = 6831; // Default Jaeger agent UDP port
+        }));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 

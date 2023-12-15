@@ -2,9 +2,8 @@ using Refit;
 
 namespace ProductPricing.API.Repositories;
 
-
-public record PricingUpdateRequest(string SessionId, decimal Price, decimal PriceAfterTax, int TaxBasisPoints, decimal TaxAmount); 
-
+public record PricingUpdateRequest(string SessionId, decimal Price, decimal PriceAfterTax, int TaxBasisPoints,
+    decimal TaxAmount);
 
 public interface ISessionOrchestratorApi
 {

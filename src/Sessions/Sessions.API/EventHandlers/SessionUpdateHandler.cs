@@ -17,14 +17,15 @@ public class SessionUpdateHandler : IRequestHandler<SessionFinished>
         _sessionOrchestratorApi = RestService.For<ISessionOrchestratorApi>(options.Value.BaseUrl);
         _logger = logger;
     }
-    
+
     public async Task Handle(SessionFinished request, CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Session {request.SessionId} finished. Updating Orchestrator.");
         Thread.Sleep(1000);
         Debug.Assert(request.End != null, "request.End != null");
-        await _sessionOrchestratorApi.Update(request.SessionId, new SessionUpdateRequest(request.SessionId, request.Status,
-           request.UserId, request.LocationId, request.Start, request.End.Value)); 
-       _logger.LogInformation($"Session {request.SessionId} updated. Orchestrator notified.");
+        await _sessionOrchestratorApi.Update(request.SessionId, new SessionUpdateRequest(request.SessionId,
+            request.Status,
+            request.UserId, request.LocationId, request.Start, request.End.Value));
+        _logger.LogInformation($"Session {request.SessionId} updated. Orchestrator notified.");
     }
 }

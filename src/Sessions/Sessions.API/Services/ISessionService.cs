@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Sessions.API.Controllers;
 
-public interface  ISessionService
+public interface ISessionService
 {
     // public Session Start(SessionStartRequest session);
     public Task<SessionResult> Stop(SessionEndRequest request);
@@ -11,4 +11,6 @@ public interface  ISessionService
     SessionEntity Rollback(string sessionId, SessionRollbackRequest request);
 }
 
-public class PricingCalculation { }
+public class PricingCalculation
+{
+}

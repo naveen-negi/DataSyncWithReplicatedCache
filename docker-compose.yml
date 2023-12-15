@@ -54,6 +54,7 @@ services:
       SessionService__baseUrl: "http://sessions-api:5290"
       ProductPricingService__baseUrl: "http://productpricing-api:5260"
       PaymentsService__baseUrl: "http://payments-api:5057"
+      ConnectionStrings__SessionOrchestratorDB: "Host=orchestrator-db; Database=orchestrator_db; Port=5432; Username=orchestrator_dev; Password=password"
       
   sessions-db:
     image: postgres:16.0-alpine
@@ -87,6 +88,17 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=tariff_dev
       - POSTGRES_DB=tariff_db
+        
+  orchestrator-db:
+    image: postgres:16.0-alpine
+    ports:
+      - "5438:5432"
+    volumes:
+      - ./volume/orchestrator_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=orchestrator_dev
+      - POSTGRES_DB=orchestrator_db
 
   jaeger:
     image: jaegertracing/all-in-one:latest

@@ -6,7 +6,6 @@ using static SessionOrchestrator.Transactions.Transaction;
 
 namespace SessionOrchestrator.Clients;
 
-
 public record BilledSessionRequest(string SessionId, string UserId,
     decimal PriceAfterTax, decimal TaxAmount,
     int TaxBasisPoints, string Currency = "EUR");

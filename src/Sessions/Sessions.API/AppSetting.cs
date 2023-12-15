@@ -2,7 +2,6 @@ namespace Sessions.API;
 
 public class AppSetting
 {
-    
 }
 
 public class ProductPricingServiceConfig

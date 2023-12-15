@@ -19,13 +19,14 @@ namespace Sessions.API.Controllers
             _logger = logger;
             _sessionService = sessionService;
         }
-        
+
         [HttpPost("sessions")]
-        public SessionResult Start([FromBody] SessionStartRequest request)
+        public Task<SessionResult> Start([FromBody] SessionStartRequest request)
         {
-            return _sessionService.Start(request);
+            _logger.LogInformation($"Session start request received.Session for user: {request.UserId} started.");
+            return Task.FromResult(_sessionService.Start(request));
         }
-        
+
         [HttpPost("sessions/{sessionId}/rollback")]
         public SessionEntity Rollback(string sessionId, [FromBody] SessionRollbackRequest request)
         {
@@ -46,7 +47,7 @@ namespace Sessions.API.Controllers
             {
                 _logger.LogError(e, "Error while stopping session: " + e.Message);
                 return StatusCode(500, e.Message);
-            } 
+            }
         }
 
         [HttpPost("sessions/{sessionId}/paymentDetails")]
@@ -63,4 +64,5 @@ public record SessionEndRequest(string SessionId);
 
 public record SessionStartRequest(string LocationId, string UserId);
 
-public record SessionResult(SessionStatus Status, Guid SessionId, string UserId, string LocationId, DateTime StartDate, DateTime? EndDate);
+public record SessionResult(SessionStatus Status, Guid SessionId, string UserId, string LocationId, DateTime StartDate,
+    DateTime? EndDate);
