@@ -26,7 +26,7 @@ public class SessionController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while processing payment for session: " + e.Message);
+            _logger.LogError(e, "Error while processing payment for session:  {Message}" , e.Message);
             return StatusCode(500, e.Message);
         }
     }
@@ -36,13 +36,13 @@ public class SessionController : ControllerBase
     {
         try
         {
-            _logger.LogInformation($"Session start request received.Session for user: {request.UserId} started.");
+            _logger.LogInformation("Session start request received.Session for user: {RequestUserId} started", request.UserId);
             var response = await _workflow.StartSession(request);
             return Ok(response);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while starting session: " + e.Message);
+            _logger.LogError(e, "Error while starting session: {Message}" , e.Message);
             return StatusCode(500, e.Message);
         }
     }
@@ -52,13 +52,13 @@ public class SessionController : ControllerBase
     {
         try
         {
-            _logger.LogInformation($"Session update request received.Session {request.SessionId} updated.");
-            _workflow.HandleSessionUpdate(request);
+            _logger.LogInformation("Session update request received.Session {RequestSessionId} updated", request.SessionId);
+            await _workflow.HandleSessionUpdate(request);
             return Ok();
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while updating session data: " + e.Message);
+            _logger.LogError(e, "Error while updating session data: {Message}" , e.Message);
             return StatusCode(500);
         }
     }
@@ -69,30 +69,29 @@ public class SessionController : ControllerBase
     {
         try
         {
-            _logger.LogInformation($"Price update request received.Session {request.SessionId} updated.");
+            _logger.LogInformation("Price update request received.Session {RequestSessionId} updated", request.SessionId);
             await _workflow.HandlePriceUpdate(request);
             return Ok();
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while updating Pricing data: " + e.Message);
+            _logger.LogError(e, "Error while updating Pricing data: {Message} " , e.Message);
             return StatusCode(500);
         }
     }
-
 
     [HttpPost("workflow/{sessionId}/payment")]
     public async Task<IActionResult> UpdatePaymentDetails([FromBody] PaymentDetailsRequest request)
     {
         try
         {
-            _logger.LogInformation($"Payment details update request received.Session {request.SessionId} updated.");
+            _logger.LogInformation("Payment details update request received. Session {Id} updated", request.SessionId);
             await _workflow.HandlePaymentUpdate(request);
             return Ok();
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while updating Payment details: " + e.Message);
+            _logger.LogError(e, "Error while updating Pricing data: {Message} " , e.Message);
             return StatusCode(500);
         }
     }
@@ -108,13 +107,13 @@ public class SessionController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error while starting session: " + e.Message);
+            _logger.LogError(e, "Error while updating Pricing data: {Message} " , e.Message);
             return StatusCode(500);
         }
     }
 }
 
-public record PricingUpdateRequest(string SessionId, decimal Price, decimal PriceAfterTax, int TaxBasisPoints,
+public record PricingUpdateRequest(Guid SessionId, decimal Price, decimal PriceAfterTax, int TaxBasisPoints,
     decimal TaxAmount);
 
-public record PaymentDetailsRequest(string SessionId, string Status);
+public record PaymentDetailsRequest(Guid SessionId, string Status);

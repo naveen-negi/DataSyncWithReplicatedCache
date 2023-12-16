@@ -14,10 +14,12 @@ public interface ISessionWorkflowRepository
 public class SessionWorkflowRepository : ISessionWorkflowRepository
 {
     private readonly OrchestratorDBContext _dbContext;
+    private readonly ILogger<SessionWorkflowRepository> _logger;
 
-    public SessionWorkflowRepository(OrchestratorDBContext dbContext)
+    public SessionWorkflowRepository(OrchestratorDBContext dbContext, ILogger<SessionWorkflowRepository> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<SessionWorkflowEntity?> GetSessionWorkflow(Guid sessionId)
@@ -28,6 +30,7 @@ public class SessionWorkflowRepository : ISessionWorkflowRepository
     
     public async Task<SessionWorkflowEntity> SaveSessionWorkflow(SessionWorkflowEntity sessionWorkflow)
     {
+        _logger.LogInformation("Saving session workflow {State}", sessionWorkflow.WorkflowState);
         // Check if the entity already exists in the database
         var existingEntity = await _dbContext.SessionWorkflows.FindAsync(sessionWorkflow.Id);
 

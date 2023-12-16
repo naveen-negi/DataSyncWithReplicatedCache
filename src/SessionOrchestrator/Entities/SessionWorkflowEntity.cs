@@ -1,6 +1,4 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using SessionOrchestrator.Workflows;
 using Stateless;
 using Stateless.Graph;
 
@@ -38,27 +36,17 @@ public class SessionWorkflowEntity
     public string UserId { get; set; }
 
     [Column(TypeName = "text")]
-    public WorkflowState WorkflowState { get; set; }
+    public WorkflowState WorkflowState { get; private set; }
 
     [NotMapped]
     private readonly StateMachine<WorkflowState, Trigger> _stateMachine;
     
-    
-    public SessionWorkflowEntity(Guid id, string userId)
-    {
-        Id = id;
-        UserId = userId;
-        WorkflowState = WorkflowState.INIT;
-        _stateMachine = new StateMachine<WorkflowState, Trigger>(WorkflowState.SESSIONS_STARTED);
-        ConfigureStateMachine();
-    }
-
     public SessionWorkflowEntity(Guid id, string userId, WorkflowState workflowState)
     {
         Id = id;
         UserId = userId;
         WorkflowState = workflowState;
-        _stateMachine = new StateMachine<WorkflowState, Trigger>(workflowState);
+        _stateMachine = new StateMachine<WorkflowState, Trigger>(() => WorkflowState, s => WorkflowState = s);
         ConfigureStateMachine();
     }
 
@@ -84,5 +72,21 @@ public class SessionWorkflowEntity
     public string ToDotGraph()
     {
         return UmlDotGraph.Format(_stateMachine.GetInfo());
-    } 
+    }
+
+    public void StopSession()
+    {
+        // LATER: Perhaps we should also store when was session stopped. So, that we have one single place to look for.
+        _stateMachine.Fire(Trigger.FinishedSession);
+    }
+
+    public void PriceSession()
+    {
+        _stateMachine.Fire(Trigger.PriceSession);
+    }
+
+    public void PaySession()
+    {
+        _stateMachine.Fire(Trigger.PaySession);
+    }
 }
