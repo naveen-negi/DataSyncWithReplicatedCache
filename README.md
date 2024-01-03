@@ -17,12 +17,15 @@ Our project is dedicated to developing a system for efficiently managing parking
 - **Payment Processing:**
     - The vehicle owner is charged upon session termination.
 
+- ** SessionOrchestrator:**
+  - Orchestrator executes the whole flow for session start and stop.
+
 ## Initial Implementation Strategy
 
 We are starting with a straightforward approach:
 - **Synchronous Communication:** Using RESTful API calls for inter-service communication.
-- **Atomic Consistency:** Ensuring transactions are processed as complete units.
-- **Choreography-based Coordination:** Allowing services to interact without centralized control.
+- **Eventual Consistency:** api calls immediately return and offload task to a background task/event.
+- **Orchestration-based Coordination:** Centralized control for whole flow.
 
 ## Core Services
 
@@ -38,12 +41,6 @@ The backend is composed of three main services:
 3. **Payment Service:**
     - Handles transactions after parking sessions.
     - Supports various payment methods including credit cards and digital wallets.
-
-## Features of the First Version
-
-- **Communication:** Synchronous, for real-time service interactions.
-- **Consistency:** Atomic, to ensure transaction integrity.
-- **Coordination:** Choreography-based, promoting decentralized service interactions.
 
 ## Prerequisites
 - Docker and Docker Compose installed on your machine.
@@ -65,6 +62,10 @@ The backend is composed of three main services:
 ## Services Configuration
 
 The `docker-compose.yml` file defines the following services:
+
+- **session Orchestration API (`orchestrator-api`):**
+    - Built from the Dockerfile in `src/SessionOrchestrator`.
+    - Accessible on port `9012`.
 
 - **Sessions API (`sessions-api`):**
     - Built from the Dockerfile in `src/Sessions/Sessions.API`.
@@ -93,89 +94,23 @@ Each service is configured with specific environment variables for database conn
 
 Run the following command:
 
-```docker-compose up
+```
+docker-compose up
 ```
 
 ---
-Starting a Successful Session
-Start another session with a different user ID using the following endpoint:
-
-POST http://localhost:5056/api/sessions
-
-Request body:
-```json 
-{
-"locationId": "1234",
-"UserId": "1"
-}
+### Starting a Successful Session
+``` bash
+./go start-valid-session
+# above command will return a sessionId
 ```
-
-Response body:
-```json 
-{
-    "status": "Started",
-    "sessionId": "some-unique-session-id",
-    "userId": "1",
-    "locationId": "1234",
-    "startDate": "2023-12-01T15:45:00.000Z",
-    "endDate": null
-}
-```
-Stopping the Successful Session
+### Stopping the Successful Session
 Stop the session using the following endpoint:
 
-POST http://localhost:5056/api/sessions/some-unique-session-id/end
-
-No request body required.
-
-Expected Response
-```json 
-{
-    "status": "Ended",
-    "sessionId": "some-unique-session-id",
-    "userId": "1",
-    "locationId": "1234",
-    "startDate": "2023-12-01T15:45:00.000Z",
-    "endDate": "2023-12-01T16:45:00.000Z"
-}
+``` bash
+./go stop-session {sessionId}
+# SessionId is received in start-valid-session command
 ```
-
----
-Starting a Failed Session (Rollback)
-Start a session with a user ID that is not in the database using the following endpoint:
-
-POST http://localhost:5056/api/sessions
-Request body:
-```json 
-{
-    "locationId": "1234",
-    "UserId": "9999"
-}
-```
-Response body:
-```json 
-{
-    "status": "Started",
-    "sessionId": "ae5166b6-c8cc-4821-aef0-52a8014d59d6",
-    "userId": "9999",
-    "locationId": "1234",
-    "startDate": "2023-12-01T15:57:13.1573133Z",
-    "endDate": null
-}
-```
-
-Stopping the Failed Session (Rollback)
-Stop the session using the following endpoint:
-POST http://localhost:5056/api/sessions/ae5166b6-c8cc-4821-aef0-52a8014d59d6/end
-
-Response: 500 Internal Server Error
-```json 
-{
-    "message": "An error occurred while processing your request. Please try again."
-}
-``` 
-
-
 
 
 
