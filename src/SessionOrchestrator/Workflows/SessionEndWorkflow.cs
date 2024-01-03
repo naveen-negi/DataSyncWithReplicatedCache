@@ -6,7 +6,6 @@ using SessionOrchestrator.Controllers;
 using SessionOrchestrator.Controllers.Dto;
 using SessionOrchestrator.Entities;
 using SessionOrchestrator.Repositories;
-using Stateless;
 
 namespace SessionOrchestrator.Workflows;
 
@@ -53,7 +52,6 @@ public class SessionWorkflow : ISessionWorkflow
 
     public async Task StopSession(string sessionId)
     {
-        // TODO: think about if need a state for this ? like SESSION_STOPPED_REQUESTED
         await _sessionServiceApi.StopSession(sessionId);
     }
 
@@ -62,19 +60,22 @@ public class SessionWorkflow : ISessionWorkflow
         var sessionWorkflow = await _sessionWorkflowRepository.GetSessionWorkflow(Guid.Parse(request.SessionId));
         // TODO: we need to update the session with the end date and status
         sessionWorkflow!.StopSession();
+        //TODO: below two calls are temporally coupled. If we make api call first, we might get a callback before we are able to save the state to database
+        // In this case, state transition will fail with below error 
+        // System.InvalidOperationException: 'No transition to state SESSION_PRICED can be found from state SESSIONS_STARTED.'
+        await _sessionWorkflowRepository.SaveSessionWorkflow(sessionWorkflow);
         await _productPricingServiceApi.CalculateSessionPrice(new SessionPricingRequest(request.SessionId, request.Start,
             request.End, request.LocationId, request.UserId));
-        await _sessionWorkflowRepository.SaveSessionWorkflow(sessionWorkflow);
     }
 
     public async Task HandlePriceUpdate(PricingUpdateRequest request)
     {
         var sessionWorkflow = await _sessionWorkflowRepository.GetSessionWorkflow(request.SessionId);
         sessionWorkflow!.PriceSession();
+        await _sessionWorkflowRepository.SaveSessionWorkflow(sessionWorkflow);
         // FIXME: UserId either needs to flow in whole transaction or should be stored in database (harding coding for now)
         await _paymentsServiceApi.ProcessPayment(new BilledSessionRequest(request.SessionId.ToString(), "1", request.PriceAfterTax,
             request.TaxAmount, request.TaxBasisPoints));
-        await _sessionWorkflowRepository.SaveSessionWorkflow(sessionWorkflow);
     }
 
     public async Task HandlePaymentUpdate(PaymentDetailsRequest request)

@@ -16,7 +16,7 @@ public enum Trigger
     PaySession,
     CompleteSession,
     FailSession,
-    FinishedSession
+    StopSession
 }
 
 public enum WorkflowState
@@ -27,7 +27,7 @@ public enum WorkflowState
     SESSION_PAID,
     SESSION_COMPLETED,
     SESSION_FAILED,
-    SESSION_ENDED
+    SESSION_STOPPED
 }
 
 public class SessionWorkflowEntity
@@ -53,10 +53,10 @@ public class SessionWorkflowEntity
     private void ConfigureStateMachine()
     {
         _stateMachine.Configure(WorkflowState.SESSIONS_STARTED)
-            .Permit(Trigger.FinishedSession, WorkflowState.SESSION_ENDED)
+            .Permit(Trigger.StopSession, WorkflowState.SESSION_STOPPED)
             .Permit(Trigger.FailSession, WorkflowState.SESSION_FAILED);
 
-        _stateMachine.Configure(WorkflowState.SESSION_ENDED)
+        _stateMachine.Configure(WorkflowState.SESSION_STOPPED)
             .Permit(Trigger.PriceSession, WorkflowState.SESSION_PRICED)
             .Permit(Trigger.FailSession, WorkflowState.SESSION_FAILED);
 
@@ -77,7 +77,7 @@ public class SessionWorkflowEntity
     public void StopSession()
     {
         // LATER: Perhaps we should also store when was session stopped. So, that we have one single place to look for.
-        _stateMachine.Fire(Trigger.FinishedSession);
+        _stateMachine.Fire(Trigger.StopSession);
     }
 
     public void PriceSession()

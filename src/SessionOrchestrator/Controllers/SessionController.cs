@@ -63,7 +63,6 @@ public class SessionController : ControllerBase
         }
     }
 
-
     [HttpPost("workflow/{sessionId}/price")]
     public async Task<IActionResult> UpdatePrice([FromBody] PricingUpdateRequest request)
     {
