@@ -1,18 +1,18 @@
 version: '3.9'
 
 services:
-  sessions-api:
-    build:
-      context: .
-      dockerfile: src/Sessions/Sessions.API/Dockerfile
-    ports:
-      - "5056:5290"
-    volumes:
-      - ./src/Sessions/Sessions.API:/build/src/Sessions/Sessions.API
-    environment:
-      ConnectionStrings__SessionsDB: "Host=sessions-db; Database=sessions_db; Port=5432; Username=sessions_dev; Password=password"
-      ProductPricingService__baseUrl: "http://productpricing-api:5260"
-      SessionOrchestrator__baseUrl: "http://orchestrator-api:5118"
+#  sessions-api:
+#    build:
+#      context: .
+#      dockerfile: src/Sessions/Sessions.API/Dockerfile
+#    ports:
+#      - "5056:5290"
+#    volumes:
+#      - ./src/Sessions/Sessions.API:/build/src/Sessions/Sessions.API
+#    environment:
+#      ConnectionStrings__SessionsDB: "Host=sessions-db; Database=sessions_db; Port=5432; Username=sessions_dev; Password=password"
+#      ProductPricingService__baseUrl: "http://productpricing-api:5260"
+#      SessionOrchestrator__baseUrl: "http://orchestrator-api:5118"
       
   productpricing-api:
     build:
@@ -20,6 +20,7 @@ services:
       dockerfile: src/ProductPricing/ProductPricing.API/Dockerfile
     ports:
       - "5055:5260"
+      - "47600:10800"
     volumes:
       - ./src/ProductPricing/ProductPricing.API:/build/src/ProductPricing/ProductPricing.API
     environment:
@@ -27,56 +28,67 @@ services:
       PaymentsService__baseUrl: "http://payments-api:5057"
       SessionOrchestratorService__baseUrl: "http://orchestrator-api:5118"
 
-  payments-api:
-    build:
-      context: .
-      dockerfile: src/Payments/Payments.API/Dockerfile
-    ports:
-      - "9011:5057"
-    volumes:
-      - ./src/Payments/Payments.API:/build/src/Payments/Payments.API
-    environment:
-        ConnectionStrings__PaymentsDB: "Host=payments-db; Database=payments_db; Port=5432; Username=payments_dev; Password=password"
-        SessionService__baseUrl: "http://sessions-api:5290"
-        ProductPricingService__baseUrl: "http://productpricing-api:5260"
-        SessionOrchestratorService__baseUrl: "http://orchestrator-api:5118"
-        
-  
-  orchestrator-api:
-    build:
-      context: .
-      dockerfile: src/SessionOrchestrator/Dockerfile
-    ports:
-      - "9012:5118"
-    volumes:
-      - ./src/SessionOrchestrator:/build/src/SessionOrchestrator
-    environment:
-      SessionService__baseUrl: "http://sessions-api:5290"
-      ProductPricingService__baseUrl: "http://productpricing-api:5260"
-      PaymentsService__baseUrl: "http://payments-api:5057"
-      ConnectionStrings__SessionOrchestratorDB: "Host=orchestrator-db; Database=orchestrator_db; Port=5432; Username=orchestrator_dev; Password=password"
-      
-  sessions-db:
-    image: postgres:16.0-alpine
-    ports:
-      - "5436:5432"
+#  payments-api:
+#    build:
+#      context: .
+#      dockerfile: src/Payments/Payments.API/Dockerfile
+#    ports:
+#      - "9011:5057"
 #    volumes:
-#      - ./volume/sessions_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_USER=sessions_dev
-      - POSTGRES_DB=sessions_db
-
-  payments-db:
-    image: postgres:16.0-alpine
+#      - ./src/Payments/Payments.API:/build/src/Payments/Payments.API
+#    environment:
+#        ConnectionStrings__PaymentsDB: "Host=payments-db; Database=payments_db; Port=5432; Username=payments_dev; Password=password"
+#        SessionService__baseUrl: "http://sessions-api:5290"
+#        ProductPricingService__baseUrl: "http://productpricing-api:5260"
+#        SessionOrchestratorService__baseUrl: "http://orchestrator-api:5118"
+        
+#  orchestrator-api:
+#    build:
+#      context: .
+#      dockerfile: src/SessionOrchestrator/Dockerfile
+#    ports:
+#      - "9012:5118"
+#    volumes:
+#      - ./src/SessionOrchestrator:/build/src/SessionOrchestrator
+#    environment:
+#      SessionService__baseUrl: "http://sessions-api:5290"
+#      ProductPricingService__baseUrl: "http://productpricing-api:5260"
+#      PaymentsService__baseUrl: "http://payments-api:5057"
+#      ConnectionStrings__SessionOrchestratorDB: "Host=orchestrator-db; Database=orchestrator_db; Port=5432; Username=orchestrator_dev; Password=password"
+      
+  users-api:
+    build:
+      context: .
+      dockerfile: src/Users/Users.API/Dockerfile
     ports:
-      - "5435:5432"
+      - "9013:5057"
+      - "47500:10800"
     volumes:
-      - ./volume/payments_data:/var/lib/postgresql/data
+      - ./src/Users/Users.API:/build/src/Users/Users.API
     environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_USER=payments_dev
-      - POSTGRES_DB=payments_db
+      ConnectionStrings__UsersDB: "Host=users-db; Database=users_db; Port=5432; Username=users_dev; Password=password"
+      
+#  sessions-db:
+#    image: postgres:16.0-alpine
+#    ports:
+#      - "5436:5432"
+##    volumes:
+##      - ./volume/sessions_data:/var/lib/postgresql/data
+#    environment:
+#      - POSTGRES_PASSWORD=password
+#      - POSTGRES_USER=sessions_dev
+#      - POSTGRES_DB=sessions_db
+#
+#  payments-db:
+#    image: postgres:16.0-alpine
+#    ports:
+#      - "5435:5432"
+#    volumes:
+#      - ./volume/payments_data:/var/lib/postgresql/data
+#    environment:
+#      - POSTGRES_PASSWORD=password
+#      - POSTGRES_USER=payments_dev
+#      - POSTGRES_DB=payments_db
 
   productpricing-db:
     image: postgres:16.0-alpine
@@ -89,16 +101,16 @@ services:
       - POSTGRES_USER=tariff_dev
       - POSTGRES_DB=tariff_db
         
-  orchestrator-db:
-    image: postgres:16.0-alpine
-    ports:
-      - "5438:5432"
-    volumes:
-      - ./volume/orchestrator_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_USER=orchestrator_dev
-      - POSTGRES_DB=orchestrator_db
+#  orchestrator-db:
+#    image: postgres:16.0-alpine
+#    ports:
+#      - "5438:5432"
+#    volumes:
+#      - ./volume/orchestrator_data:/var/lib/postgresql/data
+#    environment:
+#      - POSTGRES_PASSWORD=password
+#      - POSTGRES_USER=orchestrator_dev
+#      - POSTGRES_DB=orchestrator_db
 
   jaeger:
     image: jaegertracing/all-in-one:latest

@@ -10,11 +10,14 @@ public class PricingController : ControllerBase
 {
     private readonly ILogger<PricingController> _logger;
     private readonly ITariffService _tariffService;
+    private readonly ICacheService _cacheService;
 
-    public PricingController(ILogger<PricingController> logger, ITariffService tariffService)
+    public PricingController(ILogger<PricingController> logger, ITariffService tariffService,
+        ICacheService cacheService)
     {
         _logger = logger;
         _tariffService = tariffService;
+        _cacheService = cacheService;
     }
 
     [HttpPost("prices/calculate")]
@@ -32,6 +35,25 @@ public class PricingController : ControllerBase
             // you can have some modes in each service which you can set to simulate failure
             return StatusCode(StatusCodes.Status500InternalServerError,
                 new { message = "An error occurred while calculating price for session" });
+        }
+    }
+    
+    
+    [HttpGet("prices/try")]
+    public async Task<User> GetCacheEntry()
+    {
+        try
+        {
+            _logger.LogInformation("request received for cache entry");
+            return _cacheService.Get("John");
+        }
+        catch (Exception e)
+        {
+            // _logger.LogError(e.Message);
+            // // you can have some modes in each service which you can set to simulate failure
+            // return StatusCode(StatusCodes.Status500InternalServerError,
+            //     new { message = "An error occurred while calculating price for session" });
+            throw;
         }
     }
 }

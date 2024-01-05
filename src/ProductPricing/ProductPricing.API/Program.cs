@@ -1,3 +1,7 @@
+using Apache.Ignite.Core;
+using Apache.Ignite.Core.Cache.Configuration;
+using Apache.Ignite.Core.Discovery.Tcp;
+using Apache.Ignite.Core.Discovery.Tcp.Static;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -13,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddDbContext<TariffDBContext>();
     builder.Services.AddScoped<ITariffRepository, TariffRepository>();
     builder.Services.AddScoped<ITariffService, TariffService>();
+    builder.Services.AddScoped<ICacheService, CacheService>();
 
     var configuration = builder.Configuration;
 
@@ -35,8 +40,27 @@ var builder = WebApplication.CreateBuilder(args);
 }
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
+
+var ignite = Ignition.Start(new IgniteConfiguration
+{
+    CacheConfiguration = new[] 
+    {
+        new CacheConfiguration
+        {
+            Name = "ReplicatedCache",
+            CacheMode = CacheMode.Replicated,
+        }
+    },
+    // DiscoverySpi = new TcpDiscoverySpi
+    // {
+    //     IpFinder = new TcpDiscoveryStaticIpFinder
+    //     {
+    //         Endpoints = new[] { "users-api:10800", "productpricing-api:10800"}
+    //     }
+    // }
+});
+
+builder.Services.AddSingleton(ignite);
 
 var app = builder.Build();
 
