@@ -61,7 +61,7 @@ services:
       context: .
       dockerfile: src/Users/Users.API/Dockerfile
     ports:
-      - "9013:5057"
+      - "9013:5298"
       - "47500:10800"
     volumes:
       - ./src/Users/Users.API:/build/src/Users/Users.API

@@ -51,13 +51,13 @@ var ignite = Ignition.Start(new IgniteConfiguration
             CacheMode = CacheMode.Replicated,
         }
     },
-    // DiscoverySpi = new TcpDiscoverySpi
-    // {
-    //     IpFinder = new TcpDiscoveryStaticIpFinder
-    //     {
-    //         Endpoints = new[] { "users-api:10800", "productpricing-api:10800"}
-    //     }
-    // }
+    DiscoverySpi = new TcpDiscoverySpi
+    {
+        IpFinder = new TcpDiscoveryStaticIpFinder
+        {
+            Endpoints = new[] { "users-api:47500", "productpricing-api:47600"}
+        }
+    }
 });
 
 builder.Services.AddSingleton(ignite);
