@@ -11,18 +11,18 @@ class SessionService : ISessionService
 {
     private ILogger<SessionService> _logger;
     private readonly IMediator _mediator;
+    private readonly ICacheService _cacheService;
     private readonly ISessionsRepository _sessionsRepository;
-    private readonly ISessionOrchestratorApi _productPriceServiceApi;
 
     public SessionService(ISessionsRepository sessionsRepository,
-        IOptions<ProductPricingServiceConfig> productPricingServiceConfig,
         ILogger<SessionService> logger,
-        IMediator mediator)
+        IMediator mediator,
+        ICacheService cacheService)
     {
         _logger = logger;
         _mediator = mediator;
+        _cacheService = cacheService;
         _sessionsRepository = sessionsRepository;
-        _productPriceServiceApi = RestService.For<ISessionOrchestratorApi>(productPricingServiceConfig.Value.BaseUrl);
     }
 
     public async Task<SessionResult> Stop(SessionEndRequest request)
@@ -54,7 +54,9 @@ class SessionService : ISessionService
 
     public SessionResult Start(SessionStartRequest sessionStartRequest)
     {
-        var session = new SessionEntity(sessionStartRequest.LocationId, sessionStartRequest.UserId);
+        var user = _cacheService.Get(sessionStartRequest.LicensePlate);
+        
+        var session = new SessionEntity(sessionStartRequest.LocationId, user.Id);
         _sessionsRepository.Save(session);
         return new SessionResult(session.Status, session.Id, session.UserId, session.LocationId, session.StartDate,
             session.EndDate);

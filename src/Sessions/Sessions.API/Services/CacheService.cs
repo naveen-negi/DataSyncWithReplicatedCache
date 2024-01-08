@@ -2,7 +2,7 @@ using Apache.Ignite.Core;
 using Apache.Ignite.Core.Cache;
 using Newtonsoft.Json;
 
-namespace ProductPricing.API.Services;
+namespace Sessions.API.Services;
 
 public interface ICacheService
 {

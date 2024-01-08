@@ -7,23 +7,37 @@ namespace Users.API.Services;
 
 public interface ICacheService
 {
-    public Object Get(string name);
+    public string Get(string name);
+    void Add(User user);
 }
 
 public class CacheService : ICacheService
 {
-    private readonly ICache<string,string> _cache;
+    private ICache<string,string> _cache;
 
     public CacheService(IIgnite ignite)
     {
         _cache = ignite.GetCache<string, string>("ReplicatedCache");
-        var userId = Guid.NewGuid();
-        var user = new User(userId, "John");
-        _cache.Put(user.Name, JsonConvert.SerializeObject(user));
     }
-    
-    public Object Get(string name)
+
+    public static void InitCache(IIgnite ignite)
+    {
+        var cache = ignite.GetCache<string, string>("ReplicatedCache");
+        var user1 = new User("1", "John", "ABC123");
+        cache.Put(user1.LicensePlate, JsonConvert.SerializeObject(user1));
+
+
+        var user2 = new User("2", "Doe", "XYZ123");
+        cache.Put(user2.LicensePlate, JsonConvert.SerializeObject(user2));
+    }
+
+    public string Get(string name)
     {
         return _cache.Get(name);
+    }
+    
+    public void Add(User user)
+    {
+        _cache.GetAndPut(user.LicensePlate, JsonConvert.SerializeObject(user));
     }
 }

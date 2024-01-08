@@ -44,7 +44,7 @@ public class SessionWorkflow : ISessionWorkflow
     {
         var response = await _sessionServiceApi.StartSession(request);
         _logger.LogInformation("Received session id {ResponseSessionId} from session service", response.SessionId);
-        var workflow = new SessionWorkflowEntity(response.SessionId, request.UserId, WorkflowState.SESSIONS_STARTED);
+        var workflow = new SessionWorkflowEntity(response.SessionId, request.licensePlate, WorkflowState.SESSIONS_STARTED);
         await _sessionWorkflowRepository.SaveSessionWorkflow(workflow);
         _logger.LogInformation("Workflow state {workflowToDotGraph}", workflow.ToDotGraph());
         return response;

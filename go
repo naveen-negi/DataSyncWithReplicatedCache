@@ -12,7 +12,7 @@ start_valid_session() {
     --header 'Content-Type: application/json' \
     --data '{
         "LocationId": "1234",
-        "UserId": "1"
+        "LicensePlate": "ABC123"
     }'
     echo "Session started."
 }

@@ -27,14 +27,6 @@ namespace Sessions.API.Controllers
             return Task.FromResult(_sessionService.Start(request));
         }
 
-        [HttpPost("sessions/{sessionId}/rollback")]
-        public SessionEntity Rollback(string sessionId, [FromBody] SessionRollbackRequest request)
-        {
-            _logger.LogInformation("Rolling back session {sessionId} with reason {reason}", sessionId, request.Reason);
-            // return _sessionService.Rollback(sessionId, request);
-            return new SessionEntity("locationId", "userId");
-        }
-
         [HttpPost("sessions/{sessionId}/end")]
         public async Task<IActionResult> End(string sessionId)
         {
@@ -62,7 +54,7 @@ namespace Sessions.API.Controllers
 
 public record SessionEndRequest(string SessionId);
 
-public record SessionStartRequest(string LocationId, string UserId);
+public record SessionStartRequest(string LocationId, string LicensePlate, string? UserId);
 
 public record SessionResult(SessionStatus Status, Guid SessionId, string UserId, string LocationId, DateTime StartDate,
     DateTime? EndDate);

@@ -55,7 +55,7 @@ var ignite = Ignition.Start(new IgniteConfiguration
     {
         IpFinder = new TcpDiscoveryStaticIpFinder
         {
-            Endpoints = new[] { "users-api:47500", "productpricing-api:47600"}
+            Endpoints = new[] { "users-api:47500", "productpricing-api:47600", "sessions-api:47700"}
         }
     }
 });

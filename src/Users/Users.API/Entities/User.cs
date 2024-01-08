@@ -3,12 +3,14 @@ namespace Users.API.Entities;
 [Serializable]
 public class User
 {
-    public User(Guid id, string name)
+    public User(string id, string name, string licensePlate)
     {
         Id = id;
         Name = name;
+        LicensePlate = licensePlate;
     }
 
-    public Guid Id { get; init; }
-    public string Name { get; init; }
+    public string Id { get;  }
+    public string Name { get;  }
+    public string LicensePlate { get; }
 }

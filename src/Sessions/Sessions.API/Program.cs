@@ -1,4 +1,8 @@
 using System.Text.Json.Serialization;
+using Apache.Ignite.Core;
+using Apache.Ignite.Core.Cache.Configuration;
+using Apache.Ignite.Core.Discovery.Tcp;
+using Apache.Ignite.Core.Discovery.Tcp.Static;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Resources;
@@ -15,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddDbContext<SessionDBContext>();
     builder.Services.AddScoped<ISessionsRepository, SessionsRepository>();
     builder.Services.AddScoped<ISessionService, SessionService>();
+    builder.Services.AddScoped<ICacheService, CacheService>();
 
     var configuration = builder.Configuration;
 
@@ -33,6 +38,26 @@ builder.Services.AddHttpLogging(o =>
 builder.Services.AddControllers()
     .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
+var ignite = Ignition.Start(new IgniteConfiguration
+{
+    CacheConfiguration = new[] 
+    {
+        new CacheConfiguration
+        {
+            Name = "ReplicatedCache",
+            CacheMode = CacheMode.Replicated,
+        }
+    },
+    DiscoverySpi = new TcpDiscoverySpi
+    {
+        IpFinder = new TcpDiscoveryStaticIpFinder
+        {
+            Endpoints = new[] { "users-api:47500", "productpricing-api:47600", "sessions-api:47700"}
+        }
+    }
+});
+
+builder.Services.AddSingleton(ignite);
 
 builder.Services.AddOpenTelemetry()
     .WithTracing(b => b

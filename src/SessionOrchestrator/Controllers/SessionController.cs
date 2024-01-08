@@ -36,7 +36,7 @@ public class SessionController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Session start request received.Session for user: {RequestUserId} started", request.UserId);
+            _logger.LogInformation("Session start request received.Session for user: {RequestUserId} started", request.licensePlate);
             var response = await _workflow.StartSession(request);
             return Ok(response);
         }

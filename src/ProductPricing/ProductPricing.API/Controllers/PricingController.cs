@@ -42,18 +42,7 @@ public class PricingController : ControllerBase
     [HttpGet("prices/try")]
     public async Task<User> GetCacheEntry()
     {
-        try
-        {
             _logger.LogInformation("request received for cache entry");
-            return _cacheService.Get("John");
-        }
-        catch (Exception e)
-        {
-            // _logger.LogError(e.Message);
-            // // you can have some modes in each service which you can set to simulate failure
-            // return StatusCode(StatusCodes.Status500InternalServerError,
-            //     new { message = "An error occurred while calculating price for session" });
-            throw;
-        }
+            return _cacheService.Get("ABC123");
     }
 }
